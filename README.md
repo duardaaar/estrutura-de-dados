@@ -69,3 +69,46 @@ e o tratamento de acentos em UTF-8 exigiria uma biblioteca externa.
 Se o arquivo original tiver acentos, basta abri-lo em qualquer
 editor de texto e fazer um "localizar e substituir" das letras
 acentuadas antes de usar no sistema.
+
+=============================================
+STOPWORDS - Lista de Exclusão e Busca Binária
+Feito por: Maria Eduarda de Araújo Luiz
+=============================================
+O QUE ESSA PARTE FAZ
+
+Lê o arquivo de lista de exclusão (`stopwords.txt`), armazena as palavras na memória de forma estritamente ORDENADA e disponibiliza uma função de busca rápida usando o algoritmo de BUSCA BINÁRIA.
+Sempre que uma palavra for lida pelo tokenizer, ela deve passar por esse módulo para verificar se deve ser ignorada ou aceita no repositório final.
+
+========================================= 
+ARQUIVOS
+
+stopwords.h   → header, inclua no seu código com #include "stopwords.h"
+stopwords.c   → implementação da ordenação (qsort) e busca binária
+stopwords.txt → arquivo de texto contendo as palavras a serem excluídas (uma por linha)
+
+========================================= 
+COMO USAR NO CÓDIGO
+
+1. No início do programa principal, carregue a lista de exclusão:
+   ListaStopwords *lista_exclusao = carregar_stopwords("stopwords.txt");
+
+2. Ao percorrer as palavras do tokenizer, use a busca binária para filtrar:
+   for (int i = 0; i < lista->quantidade; i++) {
+       char *palavra = lista->palavras[i];
+
+       if (eh_stopword(lista_exclusao, palabra)) {
+           // A palavra está na lista de exclusão! Não faz nada (ignora)
+       } else {
+           // A palavra é válida! Pode inserir na sua estrutura
+           inserir_na_avl_ou_hash(palavra);
+       }
+   }
+
+3. No final do programa, libere a memória alocada:
+   liberar_stopwords(lista_exclusao);
+
+========================================= 
+COMO COMPILAR
+
+Inclua o `stopwords.c` junto com os outros arquivos na compilação do projeto:
+gcc -o programa seu_arquivo.c tokenizer.c stopwords.c
