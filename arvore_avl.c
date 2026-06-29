@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 // ===================== ESTRUTURA =====================
 
@@ -33,6 +34,10 @@ void atualizarAltura(No* no) {
 
 No* criarNo(const char* palavra) {
     No* no = (No*)malloc(sizeof(No));
+    if (!no) {
+        fprintf(stderr, "Erro de alocacao de memoria.\n");
+        exit(1);
+    }
     strncpy(no->palavra, palavra, 99);
     no->palavra[99] = '\0';
     no->ocorrencias = 1;
@@ -67,24 +72,26 @@ No* rotacaoEsquerda(No* x) {
 // ===================== BALANCEAR =====================
 
 No* balancear(No* no) {
+    if (!no) return NULL;
+
     atualizarAltura(no);
     int fb = fatorBalanceamento(no);
 
-    // Left-Left
+    // Caso Esquerda-Esquerda (Left-Left)
     if (fb > 1 && fatorBalanceamento(no->esq) >= 0)
         return rotacaoDireita(no);
 
-    // Left-Right
+    // Caso Esquerda-Direita (Left-Right)
     if (fb > 1 && fatorBalanceamento(no->esq) < 0) {
         no->esq = rotacaoEsquerda(no->esq);
         return rotacaoDireita(no);
     }
 
-    // Right-Right
+    // Caso Direita-Direita (Right-Right)
     if (fb < -1 && fatorBalanceamento(no->dir) <= 0)
         return rotacaoEsquerda(no);
 
-    // Right-Left
+    // Caso Direita-Esquerda (Right-Left)
     if (fb < -1 && fatorBalanceamento(no->dir) > 0) {
         no->dir = rotacaoDireita(no->dir);
         return rotacaoEsquerda(no);
@@ -106,7 +113,7 @@ No* inserir(No* no, const char* palavra) {
     else if (cmp > 0)
         no->dir = inserir(no->dir, palavra);
     else
-        no->ocorrencias++;  // palavra ja existe: incrementa
+        no->ocorrencias++;  // Palavra ja existe: incrementa contador
 
     return balancear(no);
 }
@@ -114,11 +121,20 @@ No* inserir(No* no, const char* palavra) {
 // ===================== BUSCA =========================
 
 int buscar(No* no, const char* palavra) {
-    if (!no) return 0;  // nao encontrada
+    if (!no) return 0;  // Nao encontrada
 
     int cmp = strcmp(palavra, no->palavra);
 
     if (cmp == 0) return no->ocorrencias;
     if (cmp < 0)  return buscar(no->esq, palavra);
     else          return buscar(no->dir, palavra);
+}
+
+// ============== FUNCAO AUXILIAR PARA LIBERAR MEMORIA ==============
+
+void liberarArvore(No* no) {
+    if (!no) return;
+    liberarArvore(no->esq);
+    liberarArvore(no->dir);
+    free(no);
 }
